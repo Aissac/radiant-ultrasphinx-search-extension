@@ -18,22 +18,24 @@ class UltrasphinxResultsPage < Page
       
     @query = request.parameters[:query] # is it safe? sanitize, maybe strip?
     @page = request.parameters[:page].blank? ? 1 : request.parameters[:page].to_i
+    @results = []
     
     page = Page.find_by_slug(request.parameters[:url])
     @config = configure(page)
     
     config_excerpting_options(@config) if excerpt?
     
-    @search = Ultrasphinx::Search.new(
-      :per_page => @config[:per_page],
-      :page => @page,
-      :query => @query,
-      :class_names => "Page",
-      :weights => {'title' => 10.0}
-      )
-    excerpt? ? @search.excerpt : @search.run
-    @results = @search.results
-    logger.debug(">>>>>>>>>>>> #{@results.size}")
+    if !@query.blank?
+      @search = Ultrasphinx::Search.new(
+        :per_page => @config[:per_page],
+        :page => @page,
+        :query => @query,
+        :class_names => "Page",
+        :weights => {'title' => 10.0}
+        )
+      excerpt? ? @search.excerpt : @search.run
+      @results = @search.results
+    end
   end
   
   desc %{
@@ -103,7 +105,7 @@ class UltrasphinxResultsPage < Page
   }
   
   tag 'unless_results' do |tag|
-    message = tag.attr['message'] || %{<p>We are sorry but there are no results for this query!</p>}
+    message = tag.attr['message'] || %{<p>We are sorry, but there are no results for this query!</p>}
     message unless @results.size > 0
   end
   
