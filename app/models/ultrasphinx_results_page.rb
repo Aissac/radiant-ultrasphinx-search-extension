@@ -1,5 +1,6 @@
 class UltrasphinxResultsPage < Page
   include Radiant::Taggable
+  include WillPaginate::ViewHelpers
   
   attr_reader :results
   
@@ -14,8 +15,9 @@ class UltrasphinxResultsPage < Page
   end
   
   def ultrasphinx_get_results(request, response)
-    
-    @query = request.parameters[:query] # should it be safe? sanitize, maybe strip?
+      
+    @query = request.parameters[:query] # is it safe? sanitize, maybe strip?
+    @page = request.parameters[:page].blank? ? 1 : request.parameters[:page].to_i
     
     page = Page.find_by_slug(request.parameters[:url])
     @config = configure(page)
@@ -24,12 +26,14 @@ class UltrasphinxResultsPage < Page
     
     @search = Ultrasphinx::Search.new(
       :per_page => @config[:per_page],
+      :page => @page,
       :query => @query,
       :class_names => "Page",
       :weights => {'title' => 10.0}
       )
     excerpt? ? @search.excerpt : @search.run
     @results = @search.results
+    logger.debug(">>>>>>>>>>>> #{@results.size}")
   end
   
   desc %{
@@ -68,6 +72,39 @@ class UltrasphinxResultsPage < Page
   
   tag 'results:excerpt_content' do |tag|
     tag.locals.page.page_part_content
+  end
+  
+  tag 'results:pagination' do |tag|
+    renderer = RadiantLinkRenderer.new(tag, @query)
+    
+    options = {}
+    [:class, :previous_label, :next_label, :inner_window, :outer_window, :separator].each do |a|
+      options[a] = tag.attr[a.to_s] unless tag.attr[a.to_s].blank?
+    end
+    will_paginate @search, options.merge(:renderer => renderer, :container => false)
+  end
+  
+  desc %{
+    Renders only if there are results.
+    
+    *Usage:*
+    <pre><code><r:if_results>...</r:if_results></code></pre>
+  }
+  
+  tag 'if_results' do |tag|
+    tag.expand if @results.size > 0
+  end
+  
+  desc %{
+    Renders the message if there are no results.
+    
+    *Usage:*
+    <pre><code><r:unless_results>...</r:unless_results></code></pre>
+  }
+  
+  tag 'unless_results' do |tag|
+    message = tag.attr['message'] || %{<p>We are sorry but there are no results for this query!</p>}
+    message unless @results.size > 0
   end
   
   private
