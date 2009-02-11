@@ -98,15 +98,14 @@ class UltrasphinxResultsPage < Page
   end
   
   desc %{
-    Renders the message if there are no results.
+    Renders if there are no results.
     
     *Usage:*
     <pre><code><r:unless_results>...</r:unless_results></code></pre>
   }
   
   tag 'unless_results' do |tag|
-    message = tag.attr['message'] || %{<p>We are sorry, but there are no results for this query!</p>}
-    message unless @results.size > 0
+    tag.expand unless @results.size > 0
   end
   
   private
