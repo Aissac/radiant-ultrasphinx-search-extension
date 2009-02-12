@@ -12,6 +12,7 @@ class UltrasphinxSearchExtension < Radiant::Extension
   
   def activate
     Page.send :include, UltrasphinxSearch::PageExtensions
+    Page.send :include, UltrasphinxSearch::UltrasphinxSearchTags
     # PagePart.send :include, UltrasphinxSearch::PagePartExtensions
     # admin.tabs.add "Ultrasphinx Search", "/admin/ultrasphinx_search", :after => "Layouts", :visibility => [:all]
   end
