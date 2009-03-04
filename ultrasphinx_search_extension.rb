@@ -2,9 +2,9 @@
 # require_dependency 'application'
 
 class UltrasphinxSearchExtension < Radiant::Extension
-  version "0.1"
+  version "0.5"
   description "Radiant Extension for the Sphinx full text search engine using the Ultrasphinx Plugin"
-  url "http://aissac.ro"
+  url "http://blog.aissac.ro/radiant/ultrasphinx-search-extension/"
   
   # define_routes do |map|
   #   map.connect 'admin/ultrasphinx_search/:action', :controller => 'admin/ultrasphinx_search'
