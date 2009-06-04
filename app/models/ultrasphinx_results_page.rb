@@ -29,7 +29,6 @@ class UltrasphinxResultsPage < Page
         :per_page => @config[:per_page],
         :page => @page,
         :query => @query,
-        :class_names => "Page",
         :weights => {'title' => 10.0}
         )
       excerpt? ? @search.excerpt : @search.run
